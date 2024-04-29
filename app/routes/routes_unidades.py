@@ -8,13 +8,20 @@ unidades_routes = Blueprint('unidades', __name__)
 @unidades_routes.route('/unidades', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        unidades = [u.to_dict() for u in Unidade.query.all()]
-        return jsonify({'unidades': unidades}), 200
+        try:
+            unidades = [u.to_dict() for u in Unidade.query.all()]
+            return jsonify({'unidades': unidades}), 200
+        except Exception as e:
+            return jsonify({"message": str(e)}), 500
     else:
-        unidade = Unidade(nome=request.json['nome'])
-        db.session.add(unidade)
-        db.session.commit()
-        return jsonify(unidade.to_dict()), 201
+        try:
+            unidade = Unidade(nome=request.json['nome'])
+            db.session.add(unidade)
+            db.session.commit()
+            return jsonify(unidade.to_dict()), 201
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({"message": str(e)}), 500
 
 
 @unidades_routes.route('/unidades/<int:id>', methods=['DELETE', 'PATCH', 'PUT'])
