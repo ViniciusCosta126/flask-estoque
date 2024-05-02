@@ -1,7 +1,7 @@
 from app.routes import jsonify, Blueprint, request
 from app.models import Unidade
 from app import db
-
+from app.schemas import UnidadeSchema, ValidationError
 unidades_routes = Blueprint('unidades', __name__)
 
 
@@ -14,14 +14,21 @@ def index():
         except Exception as e:
             return jsonify({"message": str(e)}), 500
     else:
+        json_data = request.get_json()
+        if not json_data:
+            return jsonify({"message": "Dados inválidos!"}), 400
+
+        schema = UnidadeSchema()
         try:
-            unidade = Unidade(nome=request.json['nome'])
-            db.session.add(unidade)
-            db.session.commit()
-            return jsonify(unidade.to_dict()), 201
-        except Exception as e:
+            data = schema.load(json_data)
+        except ValidationError as err:
             db.session.rollback()
-            return jsonify({"message": str(e)}), 500
+            return jsonify({"errors": err.messages}), 422
+
+        unidade = Unidade(nome=request.json['nome'])
+        db.session.add(unidade)
+        db.session.commit()
+        return jsonify(unidade.to_dict()), 201
 
 
 @unidades_routes.route('/unidades/<int:id>', methods=['DELETE', 'PATCH', 'PUT'])
