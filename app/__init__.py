@@ -16,4 +16,8 @@ def create_app():
 
     from app.models.Produto import Produto
 
+    from app.routes import produtos_routes, unidades_routes
+    app.register_blueprint(produtos_routes)
+    app.register_blueprint(unidades_routes)
+
     return app

@@ -1,8 +1,9 @@
 from app.models import db
 from datetime import datetime
+from app.models import SerializerMixin
 
 
-class Produto(db.Model):
+class Produto(db.Model, SerializerMixin):
     """Classe para representar produtos no estoque"""
     __tablename__ = 'produtos'
     id = db.Column(db.Integer, primary_key=True)
